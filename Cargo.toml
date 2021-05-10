@@ -1,0 +1,9 @@
+[package]
+name = "oscar"
+version = "0.1.0"
+authors = ["Dylan Wisswell <dylan_w2014@outlook.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
