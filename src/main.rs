@@ -1,6 +1,6 @@
 mod grover;
 
 fn main() {
-    let token = grover::Token::LeftParenthesis;
+    let mut token = grover::TokenIterator::new("hello");
     println!("Hello, world!");
 }
