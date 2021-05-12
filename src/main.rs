@@ -1,6 +1,15 @@
 mod grover;
 
 fn main() {
-    let mut token = grover::TokenIterator::new("hello");
-    println!("Hello, world!");
+    let mut token = grover::TokenIterator::new("$a23 + 5", 10);
+    while token.good() && !token.end() {
+        println!("{:?}", token.next());
+        if let Some(error) = token.get_error() {
+            println!("{}", error);
+            break;
+        } else {
+            
+        }
+    }
+    // println!("{}", token.get_error().unwrap());
 }
