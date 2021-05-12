@@ -1,7 +1,7 @@
 mod grover;
 
 fn main() {
-    let mut token = grover::TokenIterator::new(".5.", 10);
+    let mut token = grover::TokenIterator::new("$age = 5", 10);
     while token.good() && !token.end() {
         println!("{:?}", token.next());
         if let Some(error) = token.get_error() {

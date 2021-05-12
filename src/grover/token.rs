@@ -108,8 +108,7 @@ pub const ADDITION_ASSIGNMENT_TOKEN: Token = Token::Operator(ADDITION_ASSIGNMENT
 
 pub const SUBTRACTION_ASSIGNMENT_TOKEN: Token = Token::Operator(SUBTRACTION_ASSIGNMENT_OPERATOR);
 
-pub const MULTIPLICATION_ASSIGNMENT_TOKEN: Token =
-    Token::Operator(MULTIPLICATION_ASSIGNMENT_OPERATOR);
+pub const MULTIPLICATION_ASSIGNMENT_TOKEN: Token = Token::Operator(MULTIPLICATION_ASSIGNMENT_OPERATOR);
 
 pub const DIVISION_ASSIGNMENT_TOKEN: Token = Token::Operator(DIVISION_ASSIGNMENT_OPERATOR);
 
@@ -176,7 +175,9 @@ impl<'a> Iterator for TokenIterator<'a> {
             }
         };
         match character {
+            // Spaces
             ' ' => return self.next(),
+            // Variables
             '$' => {
                 let mut identifier = String::from("$");
                 if let Some(character) = self.chars.peek() {
@@ -209,6 +210,9 @@ impl<'a> Iterator for TokenIterator<'a> {
                 }
                 return Some(Token::Identifier(identifier));
             }
+            // Assignment
+            '=' => return Some(ASSIGNMENT_TOKEN),
+            // Operators
             _ if character == '+'
                 || character == '-'
                 || character == '*'
@@ -216,6 +220,7 @@ impl<'a> Iterator for TokenIterator<'a> {
                 || character == '%'
                 || character == '^' =>
             {
+                // Assignment Operators
                 if self.chars.peek() == Some(&'=') {
                     return match character {
                         '+' => {
@@ -238,6 +243,7 @@ impl<'a> Iterator for TokenIterator<'a> {
                             self.chars.next();
                             Some(REMAINDER_ASSIGNMENT_TOKEN)
                         }
+                        // Unhandled Assignment Operator
                         _ => {
                             self.clear(TokenIterator::GOOD);
                             self.state(TokenIterator::BAD);
@@ -246,6 +252,7 @@ impl<'a> Iterator for TokenIterator<'a> {
                         }
                     };
                 } else {
+                    // Arithmetic Operators
                     return match character {
                         '+' => Some(ADDITION_TOKEN),
                         '-' => Some(SUBTRACTION_TOKEN),
@@ -253,6 +260,7 @@ impl<'a> Iterator for TokenIterator<'a> {
                         '/' => Some(DIVISION_TOKEN),
                         '%' => Some(REMAINDER_TOKEN),
                         '^' => Some(POWER_TOKEN),
+                        // Unhandled Operator
                         _ => {
                             self.clear(TokenIterator::GOOD);
                             self.state(TokenIterator::BAD);
@@ -262,6 +270,7 @@ impl<'a> Iterator for TokenIterator<'a> {
                     };
                 }
             }
+            // Numbers
             _ if character.is_digit(self.radix) || if self.radix == 10 { true } else { false } && character == '.' => {
                 let mut number = String::from(&character.to_string());
                 loop {
@@ -300,6 +309,7 @@ impl<'a> Iterator for TokenIterator<'a> {
                     return Some(Token::Number(number));
                 }
             }
+            // Invalid Characters
             _ => {
                 self.clear(TokenIterator::GOOD);
                 self.state(TokenIterator::BAD);
@@ -307,6 +317,7 @@ impl<'a> Iterator for TokenIterator<'a> {
                 return None;
             }
         };
+        // No Characters Found
         self.state(TokenIterator::END);
         None
     }

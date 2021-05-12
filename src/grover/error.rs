@@ -6,7 +6,7 @@ pub enum ErrorCode {
     ArithmeticError,
 }
 
-pub struct Error<'a> {
+pub struct Error {
     pub code: ErrorCode,
-    pub message: &'a str,
+    pub message: String,
 }
