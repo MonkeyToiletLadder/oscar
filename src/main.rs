@@ -1,15 +1,15 @@
 mod grover;
 
 fn main() {
-    let mut token = grover::TokenIterator::new("$age = 5", 10);
-    while token.good() && !token.end() {
-        println!("{:?}", token.next());
-        if let Some(error) = token.get_error() {
-            println!("{}", error);
-            break;
-        } else {
-            
+    let mut lexer = grover::TokenIterator::new("(5 + 6) * 7", 10);
+    let mut parser = grover::Parser::new(lexer);
+    let tokens = match parser.intermediate() {
+        Ok(tokens) => tokens,
+        Err(error) => {
+            println!("{}", error.message);
+            return;
         }
-    }
+    };
+    println!("{}", tokens);
     // println!("{}", token.get_error().unwrap());
 }

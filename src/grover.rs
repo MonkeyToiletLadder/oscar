@@ -3,6 +3,7 @@ pub mod error;
 pub mod parser;
 pub use token::Token;
 pub use token::TokenIterator;
+pub use token::Associativity;
 pub use error::Error;
 pub use error::ErrorCode;
 pub use parser::Parser;

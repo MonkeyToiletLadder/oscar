@@ -1,9 +1,9 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Associativity {
     Left,
     Right,
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Operator<'a> {
     pub symbol: &'a str,
     pub precedence: u8,
@@ -16,25 +16,25 @@ pub struct Operator<'a> {
 
 pub const ADDITION_OPERATOR: Operator = Operator {
     symbol: "+",
-    precedence: 0,
+    precedence: 2,
     associativity: Associativity::Left,
 };
 
 pub const SUBTRACTION_OPERATOR: Operator = Operator {
     symbol: "-",
-    precedence: 0,
+    precedence: 2,
     associativity: Associativity::Left,
 };
 
 pub const MULTIPLICATION_OPERATOR: Operator = Operator {
     symbol: "*",
-    precedence: 0,
+    precedence: 1,
     associativity: Associativity::Left,
 };
 
 pub const DIVISION_OPERATOR: Operator = Operator {
     symbol: "/",
-    precedence: 0,
+    precedence: 1,
     associativity: Associativity::Left,
 };
 
@@ -46,43 +46,43 @@ pub const POWER_OPERATOR: Operator = Operator {
 
 pub const REMAINDER_OPERATOR: Operator = Operator {
     symbol: "%",
-    precedence: 0,
+    precedence: 1,
     associativity: Associativity::Left,
 };
 
 pub const ASSIGNMENT_OPERATOR: Operator = Operator {
     symbol: "=",
-    precedence: 0,
+    precedence: 3,
     associativity: Associativity::Right,
 };
 
 pub const ADDITION_ASSIGNMENT_OPERATOR: Operator = Operator {
     symbol: "+=",
-    precedence: 0,
+    precedence: 3,
     associativity: Associativity::Right,
 };
 
 pub const SUBTRACTION_ASSIGNMENT_OPERATOR: Operator = Operator {
     symbol: "-=",
-    precedence: 0,
+    precedence: 3,
     associativity: Associativity::Right,
 };
 
 pub const MULTIPLICATION_ASSIGNMENT_OPERATOR: Operator = Operator {
     symbol: "*=",
-    precedence: 0,
+    precedence: 3,
     associativity: Associativity::Right,
 };
 
 pub const DIVISION_ASSIGNMENT_OPERATOR: Operator = Operator {
     symbol: "/=",
-    precedence: 0,
+    precedence: 3,
     associativity: Associativity::Right,
 };
 
 pub const REMAINDER_ASSIGNMENT_OPERATOR: Operator = Operator {
     symbol: "%=",
-    precedence: 0,
+    precedence: 3,
     associativity: Associativity::Right,
 };
 
@@ -113,7 +113,7 @@ pub const MULTIPLICATION_ASSIGNMENT_TOKEN: Token = Token::Operator(MULTIPLICATIO
 pub const DIVISION_ASSIGNMENT_TOKEN: Token = Token::Operator(DIVISION_ASSIGNMENT_OPERATOR);
 
 pub const REMAINDER_ASSIGNMENT_TOKEN: Token = Token::Operator(REMAINDER_ASSIGNMENT_OPERATOR);
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token<'a> {
     Identifier(String),
     Number(f64),
@@ -210,6 +210,8 @@ impl<'a> Iterator for TokenIterator<'a> {
                 }
                 return Some(Token::Identifier(identifier));
             }
+            '(' => return Some(Token::LeftParenthesis),
+            ')' => return Some(Token::RightParenthesis),
             // Assignment
             '=' => return Some(ASSIGNMENT_TOKEN),
             // Operators
@@ -320,5 +322,39 @@ impl<'a> Iterator for TokenIterator<'a> {
         // No Characters Found
         self.state(TokenIterator::END);
         None
+    }
+}
+
+pub struct Tokens<'a> {
+    raw: Vec<Token<'a>>,
+}
+
+impl<'a> Tokens<'a> {
+    pub fn new() -> Self {
+        Tokens {
+            raw: Vec::<Token<'a>>::new(),
+        }
+    }
+    pub fn push(&mut self, token: Token<'a>) {
+        self.raw.push(token);
+    }
+}
+
+impl<'a> std::fmt::Display for Tokens<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut output = String::from("");
+
+        for token in &self.raw {
+            match token {
+                Token::Identifier(identifier) => output += &identifier,
+                Token::Number(number) => output += &number.to_string(),
+                Token::LeftParenthesis => output += "(",
+                Token::RightParenthesis => output += ")",
+                Token::Operator(operator) => output += operator.symbol,
+            }
+            output += " ";
+        }
+
+        write!(f, "{}", output)
     }
 }
