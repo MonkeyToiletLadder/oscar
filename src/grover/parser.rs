@@ -18,8 +18,6 @@ impl<'a> Parser<'a> {
     pub fn intermediate(&mut self) -> Result<Tokens<'a>, Error> {
         let mut tokens = Tokens::<'a>::new();
 
-        // Shunting Yard Algorithm
-
         let mut operators = Vec::<Token<'a>>::new();
 
         let mut parenthesis_depth = 0;
@@ -31,6 +29,8 @@ impl<'a> Parser<'a> {
         expected.insert("unary-plus");
         expected.insert("unary-minus");
         expected.insert("left-parenthesis");
+
+        // Shunting Yard Algorithm
 
         while let Some(token) = self.stream.next() {
             match token {
@@ -61,6 +61,8 @@ impl<'a> Parser<'a> {
                     tokens.push(token);
                 }
                 Token::Operator(ref operator) => {
+                    // Checks for next expected operator 
+                    // and handles unary plus and minus stack operations.
                     match *operator {
                         token::ADDITION_OPERATOR => {
                             if !expected.contains("unary-plus")

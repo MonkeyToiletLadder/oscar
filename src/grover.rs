@@ -1,9 +1,11 @@
 pub mod token;
 pub mod error;
 pub mod parser;
+pub mod evaluator;
 pub use token::Token;
 pub use token::TokenIterator;
 pub use token::Associativity;
 pub use error::Error;
 pub use error::ErrorCode;
 pub use parser::Parser;
+pub use evaluator::Evaluator;
