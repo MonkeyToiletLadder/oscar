@@ -374,7 +374,17 @@ impl<'a> Parser<'a> {
                     loop {
                         if let Some(&ref last_token) = operators.last() {
                             if *last_token != Token::LeftParenthesis {
-                                tokens.push(operators.pop().expect("Operator stack has valid last value but pop failed to retrieve it."));
+                                tokens.push(                
+                                    match operators.pop() {
+                                        Some(operator) => operator,
+                                        None => {
+                                            return Err(Error{
+                                                code: ErrorCode::ParserError,
+                                                message: format!("Operator stack has valid last value but pop failed to retrieve it."),
+                                            });
+                                        }    
+                                    }
+                                );
                             } else {
                                 break;
                             }
@@ -393,9 +403,15 @@ impl<'a> Parser<'a> {
 
         while operators.len() > 0 {
             tokens.push(
-                operators
-                    .pop()
-                    .expect("Operator stack has valid last value but pop failed to retrieve it."),
+                match operators.pop() {
+                    Some(operator) => operator,
+                    None => {
+                        return Err(Error{
+                            code: ErrorCode::ParserError,
+                            message: format!("Operator stack has valid last value but pop failed to retrieve it."),
+                        });
+                    }    
+                }
             );
         }
 

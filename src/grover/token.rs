@@ -10,9 +10,9 @@ pub struct Operator<'a> {
     pub associativity: Associativity,
 }
 
-// *********
+// **********************************************************************************************************************************
 // Operators
-// *********
+// **********************************************************************************************************************************
 
 pub const ADDITION_OPERATOR: Operator = Operator {
     symbol: "+",
@@ -86,9 +86,9 @@ pub const REMAINDER_ASSIGNMENT_OPERATOR: Operator = Operator {
     associativity: Associativity::Right,
 };
 
-// ******
+// **********************************************************************************************************************************
 // Tokens
-// ******
+// **********************************************************************************************************************************
 
 pub const ADDITION_TOKEN: Token = Token::Operator(ADDITION_OPERATOR);
 
@@ -329,6 +329,15 @@ pub struct Tokens<'a> {
     raw: Vec<Token<'a>>,
 }
 
+impl<'a> IntoIterator for Tokens<'a> {
+    type Item = Token<'a>;
+    type IntoIter = std::vec::IntoIter<Token<'a>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.raw.into_iter()
+    }
+}
+
 impl<'a> Tokens<'a> {
     pub fn new() -> Self {
         Tokens {
@@ -337,6 +346,12 @@ impl<'a> Tokens<'a> {
     }
     pub fn push(&mut self, token: Token<'a>) {
         self.raw.push(token);
+    }
+    pub fn pop(&mut self) -> Option<Token<'a>> {
+        self.raw.pop()
+    }
+    pub fn len(&self) -> usize {
+        self.raw.len()
     }
 }
 
