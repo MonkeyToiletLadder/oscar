@@ -7,18 +7,18 @@ use token::Token;
 use token::TokenIterator;
 use token::Tokens;
 
-pub struct Parser<'a> {
-    stream: TokenIterator<'a>,
+pub struct Parser {
+    stream: TokenIterator<'static>,
 }
 
-impl<'a> Parser<'a> {
-    pub fn new(stream: TokenIterator<'a>) -> Self {
+impl Parser {
+    pub fn new(stream: TokenIterator<'static>) -> Self {
         Parser { stream }
     }
-    pub fn intermediate(&mut self) -> Result<Tokens<'a>, Error> {
-        let mut tokens = Tokens::<'a>::new();
+    pub fn intermediate(&mut self) -> Result<Tokens, Error> {
+        let mut tokens = Tokens::new();
 
-        let mut operators = Vec::<Token<'a>>::new();
+        let mut operators = Vec::<Token>::new();
 
         let mut parenthesis_depth = 0;
 
@@ -60,7 +60,7 @@ impl<'a> Parser<'a> {
                     expected.insert("right-parenthesis");
                     tokens.push(token);
                 }
-                Token::Operator(ref operator) => {
+                Token::Operator(operator) => {
                     // Checks for next expected operator 
                     // and handles unary plus and minus stack operations.
                     match *operator {

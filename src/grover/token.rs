@@ -3,9 +3,10 @@ pub enum Associativity {
     Left,
     Right,
 }
+
 #[derive(Debug, PartialEq, Eq)]
-pub struct Operator<'a> {
-    pub symbol: &'a str,
+pub struct Operator {
+    pub symbol: &'static str,
     pub precedence: u8,
     pub associativity: Associativity,
 }
@@ -90,34 +91,35 @@ pub const REMAINDER_ASSIGNMENT_OPERATOR: Operator = Operator {
 // Tokens
 // **********************************************************************************************************************************
 
-pub const ADDITION_TOKEN: Token = Token::Operator(ADDITION_OPERATOR);
+pub const ADDITION_TOKEN: Token = Token::Operator(&ADDITION_OPERATOR);
 
-pub const SUBTRACTION_TOKEN: Token = Token::Operator(SUBTRACTION_OPERATOR);
+pub const SUBTRACTION_TOKEN: Token = Token::Operator(&SUBTRACTION_OPERATOR);
 
-pub const MULTIPLICATION_TOKEN: Token = Token::Operator(MULTIPLICATION_OPERATOR);
+pub const MULTIPLICATION_TOKEN: Token = Token::Operator(&MULTIPLICATION_OPERATOR);
 
-pub const DIVISION_TOKEN: Token = Token::Operator(DIVISION_OPERATOR);
+pub const DIVISION_TOKEN: Token = Token::Operator(&DIVISION_OPERATOR);
 
-pub const POWER_TOKEN: Token = Token::Operator(POWER_OPERATOR);
+pub const POWER_TOKEN: Token = Token::Operator(&POWER_OPERATOR);
 
-pub const REMAINDER_TOKEN: Token = Token::Operator(REMAINDER_OPERATOR);
+pub const REMAINDER_TOKEN: Token = Token::Operator(&REMAINDER_OPERATOR);
 
-pub const ASSIGNMENT_TOKEN: Token = Token::Operator(ASSIGNMENT_OPERATOR);
+pub const ASSIGNMENT_TOKEN: Token = Token::Operator(&ASSIGNMENT_OPERATOR);
 
-pub const ADDITION_ASSIGNMENT_TOKEN: Token = Token::Operator(ADDITION_ASSIGNMENT_OPERATOR);
+pub const ADDITION_ASSIGNMENT_TOKEN: Token = Token::Operator(&ADDITION_ASSIGNMENT_OPERATOR);
 
-pub const SUBTRACTION_ASSIGNMENT_TOKEN: Token = Token::Operator(SUBTRACTION_ASSIGNMENT_OPERATOR);
+pub const SUBTRACTION_ASSIGNMENT_TOKEN: Token = Token::Operator(&SUBTRACTION_ASSIGNMENT_OPERATOR);
 
-pub const MULTIPLICATION_ASSIGNMENT_TOKEN: Token = Token::Operator(MULTIPLICATION_ASSIGNMENT_OPERATOR);
+pub const MULTIPLICATION_ASSIGNMENT_TOKEN: Token = Token::Operator(&MULTIPLICATION_ASSIGNMENT_OPERATOR);
 
-pub const DIVISION_ASSIGNMENT_TOKEN: Token = Token::Operator(DIVISION_ASSIGNMENT_OPERATOR);
+pub const DIVISION_ASSIGNMENT_TOKEN: Token = Token::Operator(&DIVISION_ASSIGNMENT_OPERATOR);
 
-pub const REMAINDER_ASSIGNMENT_TOKEN: Token = Token::Operator(REMAINDER_ASSIGNMENT_OPERATOR);
+pub const REMAINDER_ASSIGNMENT_TOKEN: Token = Token::Operator(&REMAINDER_ASSIGNMENT_OPERATOR);
+
 #[derive(Debug, PartialEq)]
-pub enum Token<'a> {
+pub enum Token {
     Identifier(String),
     Number(f64),
-    Operator(Operator<'a>),
+    Operator(&'static Operator),
     LeftParenthesis,
     RightParenthesis,
 }
@@ -164,10 +166,17 @@ impl<'a> TokenIterator<'a> {
     }
 }   
 
-impl<'a> Iterator for TokenIterator<'a> {
-    type Item = Token<'a>;
-    fn next(&mut self) -> Option<<TokenIterator<'a> as Iterator>::Item> {
-        let character: char = match self.chars.next() {
+impl Iterator for TokenIterator<'_> {
+    type Item = Token;
+    fn next(&mut self) -> Option<<TokenIterator as Iterator>::Item> {
+        while let Some(character) = self.chars.peek() {
+            if *character == ' ' {
+                self.chars.next();
+            } else {
+                break;
+            }
+        }
+        let mut character: char = match self.chars.next() {
             Some(character) => character,
             None => {
                 self.state(TokenIterator::END);
@@ -175,8 +184,6 @@ impl<'a> Iterator for TokenIterator<'a> {
             }
         };
         match character {
-            // Spaces
-            ' ' => return self.next(),
             // Variables
             '$' => {
                 let mut identifier = String::from("$");
@@ -215,12 +222,7 @@ impl<'a> Iterator for TokenIterator<'a> {
             // Assignment
             '=' => return Some(ASSIGNMENT_TOKEN),
             // Operators
-            _ if character == '+'
-                || character == '-'
-                || character == '*'
-                || character == '/'
-                || character == '%'
-                || character == '^' =>
+            '+' | '-' | '*' | '/' | '%' | '^' =>
             {
                 // Assignment Operators
                 if self.chars.peek() == Some(&'=') {
@@ -325,29 +327,29 @@ impl<'a> Iterator for TokenIterator<'a> {
     }
 }
 
-pub struct Tokens<'a> {
-    raw: Vec<Token<'a>>,
+pub struct Tokens {
+    raw: Vec<Token>,
 }
 
-impl<'a> IntoIterator for Tokens<'a> {
-    type Item = Token<'a>;
-    type IntoIter = std::vec::IntoIter<Token<'a>>;
+impl IntoIterator for Tokens {
+    type Item = Token;
+    type IntoIter = std::vec::IntoIter<Token>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.raw.into_iter()
     }
 }
 
-impl<'a> Tokens<'a> {
+impl Tokens {
     pub fn new() -> Self {
         Tokens {
-            raw: Vec::<Token<'a>>::new(),
+            raw: Vec::<Token>::new(),
         }
     }
-    pub fn push(&mut self, token: Token<'a>) {
+    pub fn push(&mut self, token: Token) {
         self.raw.push(token);
     }
-    pub fn pop(&mut self) -> Option<Token<'a>> {
+    pub fn pop(&mut self) -> Option<Token> {
         self.raw.pop()
     }
     pub fn len(&self) -> usize {
@@ -355,7 +357,7 @@ impl<'a> Tokens<'a> {
     }
 }
 
-impl<'a> std::fmt::Display for Tokens<'a> {
+impl std::fmt::Display for Tokens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut output = String::from("");
 

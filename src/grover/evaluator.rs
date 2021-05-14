@@ -7,18 +7,18 @@ use std::collections::HashSet;
 use token::Token;
 use token::Tokens;
 
-pub struct Evaluator<'a> {
+pub struct Evaluator {
     variables: HashMap<String, f64>,
     constants: HashSet<String>,
-    values: Tokens<'a>,
+    values: Tokens,
 }
 
-impl<'a> Evaluator<'a> {
+impl Evaluator {
     pub fn new() -> Self {
         let evaluator = Evaluator {
             variables: HashMap::<String, f64>::new(),
             constants: HashSet::<String>::new(),
-            values: Tokens::<'a>::new(),
+            values: Tokens::new(),
         };
 
         evaluator
@@ -75,13 +75,13 @@ impl<'a> Evaluator<'a> {
             }
         }
     }
-    pub fn push_value(&mut self, value: Token<'a>) {
+    pub fn push_value(&mut self, value: Token) {
         self.values.push(value);
     }
     pub fn is_constant(&self, ident: &String) -> bool {
         self.constants.contains(ident)
     }
-    pub fn evaluate(&mut self, tokens: Tokens<'a>) -> Result<f64, Error> {
+    pub fn evaluate(&mut self, tokens: Tokens) -> Result<f64, Error> {
         let ans = 0f64;
 
         for token in tokens.into_iter() {
@@ -89,8 +89,6 @@ impl<'a> Evaluator<'a> {
                 Token::Number(_) => {
                     self.values.push(token);
                 }
-                // String does not implement the copy trait.
-                // Token will be moved here unless we get a ref to the inner data.
                 Token::Identifier(ref identifier) => {
                     if !self.variables.contains_key(identifier) {
                         self.variables.insert(identifier.clone(), 0f64);
@@ -98,7 +96,7 @@ impl<'a> Evaluator<'a> {
                     self.values.push(token);
                 }
                 Token::Operator(operator) => {
-                    match operator {
+                    match *operator {
                         token::ADDITION_OPERATOR => {
                             let rhs = self.pop_value()?;
                             let lhs = self.pop_value()?;

@@ -1,7 +1,7 @@
 mod grover;
 
 fn main() {
-    let mut lexer = grover::TokenIterator::new("(5 + 4) * 2", 10);
+    let mut lexer = grover::TokenIterator::new("(5   +4) * 2", 10);
     let mut parser = grover::Parser::new(lexer);
     let tokens = match parser.intermediate() {
         Ok(tokens) => tokens,
